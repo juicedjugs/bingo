@@ -1,7 +1,6 @@
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import { execSync } from "child_process";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -52,24 +51,13 @@ for (const file of staticFiles) {
   fs.copyFileSync(srcPath, destPath);
 }
 
-console.log("✅ Files prepared for deployment!");
-console.log("📂 Deploy from:", deployDir);
-console.log("");
-console.log("🚀 Deploying to GitHub Pages...");
-
-try {
-  // Add, commit, and push using git subtree
-  execSync("git add .", { cwd: rootDir, stdio: "inherit" });
-  execSync('git commit -m "Build for deployment"', {
-    cwd: rootDir,
-    stdio: "inherit",
-  });
-  execSync("git subtree push --prefix deploy origin gh-pages", {
-    cwd: rootDir,
-    stdio: "inherit",
-  });
-  console.log("🎉 Successfully deployed to GitHub Pages!");
-} catch (error) {
-  console.error("❌ Deployment failed:", error.message);
-  process.exit(1);
+// Remove the build dir.
+const buildDir = path.join(rootDir, "build");
+if (fs.existsSync(buildDir)) {
+  fs.rmSync(buildDir, { recursive: true });
 }
+
+// Rename the deploy dir to build.
+fs.renameSync(deployDir, buildDir);
+
+console.log("✅ Files prepared for deployment!");

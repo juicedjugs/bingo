@@ -3,10 +3,9 @@
   "type": "module",
   "scripts": {
     "dev": "react-router dev",
-    "build": "react-router build",
-    "start": "npx serve build/client",
-    "gen:icons": "tsx scripts/generateIcons.ts",
-    "deploy": "npm run build && node scripts/deploy.js"
+    "build": "react-router build && node scripts/gh-pages.js",
+    "start": "npx serve build",
+    "gen:icons": "tsx scripts/generateIcons.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
