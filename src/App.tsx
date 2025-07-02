@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Box, Tab, Tabs } from "@mui/material";
 import { Icon } from "@iconify/react";
 import { CacheProvider } from "@emotion/react";
@@ -8,49 +8,13 @@ import "./utils/icons";
 import { StateProvider, TileIdeasProvider } from "./state";
 import TeamsView from "./components/viewspace/TeamsView";
 import BoardView from "./components/viewspace/BoardView";
-const basename = import.meta.env.BASE_URL;
+
 type Page = "teams" | "board";
 
 const cache = createEmotionCache();
 
 const AppContent = () => {
   const [currentPage, setCurrentPage] = useState<Page>("teams");
-
-  // Handle initial URL and browser navigation
-  useEffect(() => {
-    const getPageFromURL = (): Page => {
-      const path = window.location.pathname;
-
-      // Remove basename from path for comparison
-      const relativePath = basename ? path.replace(basename, "") : path;
-
-      if (relativePath.includes("board")) return "board";
-      if (relativePath.includes("teams")) return "teams";
-
-      // Default to teams for root path
-      return "teams";
-    };
-
-    // Set initial page from URL
-    setCurrentPage(getPageFromURL());
-
-    // Listen to browser back/forward buttons
-    const handlePopState = () => {
-      setCurrentPage(getPageFromURL());
-    };
-
-    window.addEventListener("popstate", handlePopState);
-    return () => window.removeEventListener("popstate", handlePopState);
-  }, []);
-
-  const navigateToPage = (page: Page) => {
-    setCurrentPage(page);
-
-    // Build the correct URL with basename
-    const newPath = `${basename}${page}`;
-
-    window.history.pushState({}, "", newPath);
-  };
 
   return (
     <>
@@ -64,7 +28,7 @@ const AppContent = () => {
         }}>
         <Tabs centered value={currentPage}>
           <Tab
-            onClick={() => navigateToPage("teams")}
+            onClick={() => setCurrentPage("teams")}
             label={
               <Box sx={{ display: "flex", alignItems: "center", gap: "6px" }}>
                 <Icon
@@ -78,7 +42,7 @@ const AppContent = () => {
             value="teams"
           />
           <Tab
-            onClick={() => navigateToPage("board")}
+            onClick={() => setCurrentPage("board")}
             label={
               <Box sx={{ display: "flex", gap: "6px" }}>
                 <Icon icon="mdi:grid" height={18} />
