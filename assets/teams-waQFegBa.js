@@ -1,0 +1,1 @@
+import{w as t,p as o}from"./chunk-QMGIS6GS-BQ5ZSHI-.js";import{T as m}from"./TeamsView-D4eLyMNQ.js";import"./Viewspace-D_v2HSuN.js";import"./state-CSx9Bxjn.js";import"./iconify-CZhN-2v0.js";import"./Box-Be1EMmzP.js";import"./index-DUuVLYlT.js";const u=t(function(){return o.jsx(m,{})});export{u as default};
