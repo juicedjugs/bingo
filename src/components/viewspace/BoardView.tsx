@@ -56,9 +56,9 @@ export default function BoardView() {
     // Tile idea dropped on bingo tile
     if (
       active.id.toString().startsWith("tile-idea-") &&
-      over.id.toString().startsWith("droppable-")
+      over.id.toString().startsWith("bingo-")
     ) {
-      const tileIndex = Number(over.id.toString().replace("droppable-", ""));
+      const tileIndex = Number(over.id.toString().replace("bingo-", ""));
       const tileIdea = event.active.data?.current?.tileIdea;
       if (tileIdea?.id) {
         assignTileIdeaToBingoTile(tileIndex, tileIdea.id);
