@@ -27,7 +27,6 @@ jobs:
       - name: Build
         run: |
           VITE_BASE=/bingo/ npm run build
-          cp ./build/client/index.html ./build/client/404.html
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v4
