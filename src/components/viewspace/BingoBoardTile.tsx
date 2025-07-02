@@ -47,6 +47,8 @@ export const BingoBoardTile = ({
 
   const isTileIdeaOver =
     isOver && active?.id?.toString().startsWith("tile-idea-");
+  const isBingoTileOver =
+    isOver && active?.id?.toString().startsWith("bingo-") && active.id !== id;
   const size = 150 * (scale / 100);
 
   // Layout: images in a row at the top, description text below
@@ -240,6 +242,19 @@ export const BingoBoardTile = ({
         {/* Green highlight for tile idea drop */}
         {isTileIdeaOver && (
           <rect x={0} y={0} width={size} height={size} fill="#00c85322" />
+        )}
+        {/* Green highlight for bingo tile swap */}
+        {isBingoTileOver && (
+          <rect
+            x={0}
+            y={0}
+            width={size}
+            height={size}
+            fill="#00c85322"
+            stroke="#00c853"
+            strokeWidth="2"
+            strokeDasharray="5,5"
+          />
         )}
         {/* Item images */}
         {items.slice(0, 3).map((item, idx) => (

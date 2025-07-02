@@ -2,7 +2,7 @@ import { Box } from "@mui/material";
 import { useState } from "react";
 import {
   DndContext,
-  rectIntersection,
+  closestCenter,
   DragEndEvent,
   DragOverlay,
 } from "@dnd-kit/core";
@@ -65,7 +65,7 @@ export default function BoardView() {
       }
     }
 
-    // Bingo tile reordering
+    // Bingo tile swapping (only swap if different positions)
     if (
       active.id.toString().startsWith("bingo-") &&
       over.id.toString().startsWith("bingo-")
@@ -80,7 +80,7 @@ export default function BoardView() {
 
   return (
     <DndContext
-      collisionDetection={rectIntersection}
+      collisionDetection={closestCenter}
       onDragEnd={handleDragEnd}
       onDragStart={handleDragStart}>
       <Box sx={{ display: "flex" }}>

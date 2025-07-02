@@ -181,9 +181,12 @@ function stateReducer(state: State, action: Action): State {
       };
     case "REORDER_BINGO_BOARD": {
       const { from, to } = action.payload;
+      if (from === to) return state; // No change needed
+
       const newBoard = [...state.bingoBoard];
-      const [removed] = newBoard.splice(from, 1);
-      newBoard.splice(to, 0, removed);
+      // Simple swap: exchange the tiles at positions 'from' and 'to'
+      [newBoard[from], newBoard[to]] = [newBoard[to], newBoard[from]];
+
       return { ...state, bingoBoard: newBoard };
     }
     case "ASSIGN_TILE_IDEA_TO_BINGO_TILE": {
