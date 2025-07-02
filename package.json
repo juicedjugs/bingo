@@ -5,7 +5,8 @@
     "dev": "react-router dev",
     "build": "react-router build",
     "start": "npx serve build/client",
-    "gen:icons": "tsx scripts/generateIcons.ts"
+    "gen:icons": "tsx scripts/generateIcons.ts",
+    "deploy": "npm run build && node scripts/deploy.js"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

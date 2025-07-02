@@ -3,7 +3,7 @@ import { defineConfig } from "vite";
 
 export default defineConfig(() => ({
   plugins: [reactRouter()],
-  base: "/bingo/", // GitHub Pages base path for your repository
+  base: "/", // Assets will be at root level when we deploy the bingo subfolder
   ssr: {
     // Workaround for resolving dependencies in the server bundle
     // Without this, the React context will be different between direct import and transitive imports in development environment
