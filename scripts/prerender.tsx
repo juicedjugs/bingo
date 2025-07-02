@@ -157,8 +157,12 @@ export function prerender() {
     ? `/bingo/assets/${mainJsFile}`
     : "/bingo/assets/index.js";
 
-  // Pre-render teams page (index)
-  prerenderPage("teams", path.join(distDir, "index.html"), scriptPath);
+  // Pre-render teams page
+  prerenderPage(
+    "teams",
+    path.join(distDir, "teams", "index.html"),
+    "../" + scriptPath.substring(1),
+  );
 
   // Pre-render board page
   prerenderPage(
@@ -167,12 +171,25 @@ export function prerender() {
     "../" + scriptPath.substring(1),
   );
 
-  // Also create teams directory for direct access
-  prerenderPage(
-    "teams",
-    path.join(distDir, "teams", "index.html"),
-    "../" + scriptPath.substring(1),
-  );
+  // Create a simple redirect for the root path
+  const redirectHTML = `<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bingo Maker - Redirecting...</title>
+    <script>
+      // Redirect to teams page
+      window.location.replace('/bingo/teams');
+    </script>
+  </head>
+  <body>
+    <p>Redirecting to teams page...</p>
+    <a href="/bingo/teams">Click here if you are not redirected automatically</a>
+  </body>
+</html>`;
+
+  fs.writeFileSync(path.join(distDir, "index.html"), redirectHTML);
 
   console.log("🎉 Pre-rendering complete!");
 }

@@ -7,7 +7,7 @@ import {
   DragOverlay,
 } from "@dnd-kit/core";
 import { useAppState } from "../../state";
-import { TileIdeasProvider, useTileIdeas, TileIdea } from "../../state";
+import { useTileIdeas, TileIdea } from "../../state";
 import { PlayerCard } from "./Teams";
 import Sidebar from "../sidebar/Sidebar";
 import Viewspace from "./Viewspace";
@@ -91,23 +91,21 @@ export default function TeamsView() {
       collisionDetection={rectIntersection}
       onDragEnd={handleDragEnd}
       onDragStart={handleDragStart}>
-      <TileIdeasProvider>
-        <Box sx={{ display: "flex" }}>
-          <Sidebar tab="teams" />
-          <Viewspace tab="teams" />
-        </Box>
-        <DragOverlay dropAnimation={null}>
-          {activeType === "player" && activeDrag ? (
-            <PlayerCard
-              username={activeDrag.data?.current?.username || "Player"}
-              combatLevel={activeDrag.data?.current?.combatLevel || null}
-              isLoading={activeDrag.data?.current?.isLoading || false}
-              hasError={activeDrag.data?.current?.hasError || false}
-              stats={activeDrag.data?.current?.stats || null}
-            />
-          ) : null}
-        </DragOverlay>
-      </TileIdeasProvider>
+      <Box sx={{ display: "flex" }}>
+        <Sidebar tab="teams" />
+        <Viewspace tab="teams" />
+      </Box>
+      <DragOverlay dropAnimation={null}>
+        {activeType === "player" && activeDrag ? (
+          <PlayerCard
+            username={activeDrag.data?.current?.username || "Player"}
+            combatLevel={activeDrag.data?.current?.combatLevel || null}
+            isLoading={activeDrag.data?.current?.isLoading || false}
+            hasError={activeDrag.data?.current?.hasError || false}
+            stats={activeDrag.data?.current?.stats || null}
+          />
+        ) : null}
+      </DragOverlay>
     </DndContext>
   );
 }

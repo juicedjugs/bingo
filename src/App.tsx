@@ -8,15 +8,10 @@ import "./utils/icons";
 import { StateProvider, TileIdeasProvider } from "./state";
 import TeamsView from "./components/viewspace/TeamsView";
 import BoardView from "./components/viewspace/BoardView";
-
+const basename = import.meta.env.BASE_URL;
 type Page = "teams" | "board";
 
 const cache = createEmotionCache();
-
-// Get the basename based on environment
-const getBasename = () => {
-  return import.meta.env.DEV ? "" : "/bingo";
-};
 
 const AppContent = () => {
   const [currentPage, setCurrentPage] = useState<Page>("teams");
@@ -25,12 +20,14 @@ const AppContent = () => {
   useEffect(() => {
     const getPageFromURL = (): Page => {
       const path = window.location.pathname;
-      const basename = getBasename();
 
       // Remove basename from path for comparison
       const relativePath = basename ? path.replace(basename, "") : path;
 
-      if (relativePath.includes("/board")) return "board";
+      if (relativePath.includes("board")) return "board";
+      if (relativePath.includes("teams")) return "teams";
+
+      // Default to teams for root path
       return "teams";
     };
 
@@ -50,19 +47,7 @@ const AppContent = () => {
     setCurrentPage(page);
 
     // Build the correct URL with basename
-    const basename = getBasename();
-    let newPath: string;
-
-    if (page === "teams") {
-      newPath = basename + "/";
-    } else {
-      newPath = basename + `/${page}`;
-    }
-
-    // Handle root case for development
-    if (import.meta.env.DEV && newPath === "/") {
-      newPath = "/";
-    }
+    const newPath = `${basename}${page}`;
 
     window.history.pushState({}, "", newPath);
   };

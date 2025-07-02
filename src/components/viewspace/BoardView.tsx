@@ -7,7 +7,7 @@ import {
   DragOverlay,
 } from "@dnd-kit/core";
 import { useAppState } from "../../state";
-import { TileIdeasProvider, useTileIdeas, TileIdea } from "../../state";
+import { useTileIdeas, TileIdea } from "../../state";
 import Sidebar from "../sidebar/Sidebar";
 import Viewspace from "./Viewspace";
 import { BingoBoardTile } from "./BingoBoardTile";
@@ -53,24 +53,28 @@ export default function BoardView() {
     const { active, over } = event;
     if (!over) return;
 
-    // Sortable: reorder bingo board
+    // Tile idea dropped on bingo tile
+    if (
+      active.id.toString().startsWith("tile-idea-") &&
+      over.id.toString().startsWith("droppable-")
+    ) {
+      const tileIndex = Number(over.id.toString().replace("droppable-", ""));
+      const tileIdea = event.active.data?.current?.tileIdea;
+      if (tileIdea?.id) {
+        assignTileIdeaToBingoTile(tileIndex, tileIdea.id);
+      }
+    }
+
+    // Bingo tile reordering
     if (
       active.id.toString().startsWith("bingo-") &&
       over.id.toString().startsWith("bingo-")
     ) {
-      const from = Number(active.id.toString().replace("bingo-", ""));
-      const to = Number(over.id.toString().replace("bingo-", ""));
-      if (from !== to) reorderBingoBoard(from, to);
-    }
-
-    // Sidebar tile idea dropped on board
-    if (
-      active.id.toString().startsWith("tile-idea-") &&
-      over.id.toString().startsWith("bingo-")
-    ) {
-      const tileIdeaId = event.active.data?.current?.tileIdea?.id;
-      const tileIndex = Number(over.id.toString().replace("bingo-", ""));
-      if (tileIdeaId) assignTileIdeaToBingoTile(tileIndex, tileIdeaId);
+      const fromIndex = Number(active.id.toString().replace("bingo-", ""));
+      const toIndex = Number(over.id.toString().replace("bingo-", ""));
+      if (fromIndex !== toIndex) {
+        reorderBingoBoard(fromIndex, toIndex);
+      }
     }
   };
 
@@ -79,58 +83,56 @@ export default function BoardView() {
       collisionDetection={rectIntersection}
       onDragEnd={handleDragEnd}
       onDragStart={handleDragStart}>
-      <TileIdeasProvider>
-        <Box sx={{ display: "flex" }}>
-          <Sidebar tab="board" />
-          <Viewspace tab="board" />
-        </Box>
-        <DragOverlay dropAnimation={null}>
-          {activeType === "tile-idea" && activeTileIdea ? (
-            <Box
-              sx={{
-                background: "#222",
-                color: "#fff",
-                borderRadius: 2,
-                boxShadow: 3,
-                p: 2,
-                minWidth: 120,
-                minHeight: 60,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                opacity: 0.95,
-              }}>
-              <Box>{activeTileIdea.description}</Box>
-              <Box sx={{ display: "flex", gap: 1, mt: 1 }}>
-                {activeTileIdea.items?.slice(0, 3).map((item: string) => (
-                  <img
-                    key={item}
-                    src={getItemImgURL(item)}
-                    alt={item}
-                    height={28}
-                    width={28}
-                    style={{ filter: "drop-shadow(0 0 2px #000000)" }}
-                  />
-                ))}
-              </Box>
+      <Box sx={{ display: "flex" }}>
+        <Sidebar tab="board" />
+        <Viewspace tab="board" />
+      </Box>
+      <DragOverlay dropAnimation={null}>
+        {activeType === "tile-idea" && activeTileIdea ? (
+          <Box
+            sx={{
+              background: "#222",
+              color: "#fff",
+              borderRadius: 2,
+              boxShadow: 3,
+              p: 2,
+              minWidth: 120,
+              minHeight: 60,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              opacity: 0.95,
+            }}>
+            <Box>{activeTileIdea.description}</Box>
+            <Box sx={{ display: "flex", gap: 1, mt: 1 }}>
+              {activeTileIdea.items?.slice(0, 3).map((item: string) => (
+                <img
+                  key={item}
+                  src={getItemImgURL(item)}
+                  alt={item}
+                  height={28}
+                  width={28}
+                  style={{ filter: "drop-shadow(0 0 2px #000000)" }}
+                />
+              ))}
             </Box>
-          ) : null}
-          {activeType === "bingo-tile" && activeBingoTile ? (
-            <BingoBoardTile
-              id={activeBingoTile.id}
-              description={activeBingoTile.description}
-              items={activeBingoTile.items}
-              scale={activeBingoTile.scale}
-              row={0}
-              col={0}
-              dimension={1}
-              forceAllBorders={true}
-              tileIndex={0}
-            />
-          ) : null}
-        </DragOverlay>
-      </TileIdeasProvider>
+          </Box>
+        ) : null}
+        {activeType === "bingo-tile" && activeBingoTile ? (
+          <BingoBoardTile
+            id={activeBingoTile.id}
+            description={activeBingoTile.description}
+            items={activeBingoTile.items}
+            scale={activeBingoTile.scale}
+            row={0}
+            col={0}
+            dimension={1}
+            forceAllBorders={true}
+            tileIndex={0}
+          />
+        ) : null}
+      </DragOverlay>
     </DndContext>
   );
 }

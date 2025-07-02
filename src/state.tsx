@@ -239,12 +239,29 @@ function stateReducer(state: State, action: Action): State {
       return { ...state, teams: newTeams };
     }
     case "REMOVE_TEAM": {
-      const newTeams = state.teams.filter((_, i) => i !== action.payload.index);
-      // Remove teamId from players who were in this team
-      const removedTeamId = String(action.payload.index);
-      const newPlayers = state.players.map((p) =>
-        p.teamId === removedTeamId ? { ...p, teamId: null } : p,
-      );
+      const removedTeamIndex = action.payload.index;
+      const newTeams = state.teams.filter((_, i) => i !== removedTeamIndex);
+
+      // Update player teamIds to account for the index shift
+      const newPlayers = state.players.map((p) => {
+        if (p.teamId === null) return p;
+
+        const currentTeamIndex = parseInt(p.teamId);
+
+        // If player was in the removed team, unassign them
+        if (currentTeamIndex === removedTeamIndex) {
+          return { ...p, teamId: null };
+        }
+
+        // If player was in a team with a higher index, decrement their teamId
+        if (currentTeamIndex > removedTeamIndex) {
+          return { ...p, teamId: String(currentTeamIndex - 1) };
+        }
+
+        // Player was in a team with lower index, no change needed
+        return p;
+      });
+
       return { ...state, teams: newTeams, players: newPlayers };
     }
     case "ADD_PLAYER": {
@@ -458,13 +475,16 @@ export type TileIdea = {
 type TileIdeasAction =
   | { type: "ADD_TILE_IDEA"; payload: TileIdea }
   | { type: "UPDATE_TILE_IDEA"; payload: TileIdea }
-  | { type: "DELETE_TILE_IDEA"; payload: { id: string } };
+  | { type: "DELETE_TILE_IDEA"; payload: { id: string } }
+  | { type: "HYDRATE_FROM_STORAGE"; payload: TileIdea[] };
 
 function tileIdeasReducer(
   state: TileIdea[],
   action: TileIdeasAction,
 ): TileIdea[] {
   switch (action.type) {
+    case "HYDRATE_FROM_STORAGE":
+      return action.payload;
     case "ADD_TILE_IDEA":
       return [...state, action.payload];
     case "UPDATE_TILE_IDEA":
