@@ -7,7 +7,11 @@ const DefaultLayout = () => {
 
   // Determine current tab from URL
   const getCurrentTab = (): "teams" | "board" => {
-    if (location.pathname === "/board") return "board";
+    // Strip the basename to get the relative path
+    const basePath = import.meta.env.BASE_URL?.replace(/\/$/, "") || "";
+    const relativePath = location.pathname.replace(basePath, "") || "/";
+
+    if (relativePath === "/board") return "board";
     return "teams"; // Default to teams for "/" and "/teams"
   };
 
