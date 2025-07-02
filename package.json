@@ -3,7 +3,7 @@
   "type": "module",
   "scripts": {
     "dev": "react-router dev",
-    "build": "react-router build && node scripts/gh-pages.js",
+    "build": "react-router build",
     "start": "npx serve build",
     "gen:icons": "tsx scripts/generateIcons.ts"
   },
