@@ -1,19 +1,11 @@
-import { reactRouter } from "@react-router/dev/vite";
 import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
 
-export default defineConfig(() => ({
-  plugins: [reactRouter()],
-  basename: "/bingo/",
-  ssr: {
-    // Workaround for resolving dependencies in the server bundle
-    // Without this, the React context will be different between direct import and transitive imports in development environment
-    // For more information, see https://github.com/mui/material-ui/issues/45878#issuecomment-2987441663
-    optimizeDeps: {
-      include: ["@emotion/*", "@mui/*"],
-    },
-    noExternal: ["@emotion/*", "@mui/*"],
-  },
+export default defineConfig({
+  plugins: [react()],
+  base: "/bingo/",
   build: {
+    outDir: "dist",
     rollupOptions: {
       external: ["node:fs/promises", "node:path", "@iconify/json"],
     },
@@ -27,4 +19,4 @@ export default defineConfig(() => ({
       interval: 100,
     },
   },
-}));
+});

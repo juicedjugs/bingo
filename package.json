@@ -2,10 +2,11 @@
   "name": "kebab-bingo",
   "type": "module",
   "scripts": {
-    "dev": "react-router dev",
-    "build": "react-router build",
-    "start": "npx serve build",
-    "gen:icons": "tsx scripts/generateIcons.ts"
+    "dev": "vite",
+    "build": "vite build && tsx scripts/prerender.tsx",
+    "start": "npx serve dist",
+    "gen:icons": "tsx scripts/generateIcons.ts",
+    "deploy": "npm run build && git add dist && git commit -m 'Build for deployment' && git subtree push --prefix dist origin gh-pages --force"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -16,8 +17,6 @@
     "@emotion/server": "^11.11.0",
     "@emotion/styled": "^11.14.1",
     "@mui/material": "^7.1.2",
-    "@react-router/node": "^7.6.3",
-    "isbot": "^5.1.28",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "nanoid": "^5.1.5",
@@ -26,10 +25,10 @@
   "devDependencies": {
     "@iconify/json": "^2.2.353",
     "@iconify/react": "^6.0.0",
-    "@react-router/dev": "^7.6.3",
     "@types/node": "^24.0.7",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
+    "@vitejs/plugin-react": "^4.3.4",
     "tsx": "^4.20.3",
     "typescript": "^5.8.3",
     "vite": "^7.0.0"
