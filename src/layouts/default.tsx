@@ -7,8 +7,12 @@ const DefaultLayout = () => {
 
   // Determine current tab from URL
   const getCurrentTab = (): "teams" | "board" => {
-    if (location.pathname === "/board") return "board";
-    return "teams"; // Default to teams for "/" and "/teams"
+    // Extract the path without basename for comparison
+    const path = location.pathname;
+    if (path.endsWith("/board")) return "board";
+    if (path.endsWith("/teams")) return "teams";
+    if (path === "/" || path.endsWith("/")) return "teams"; // Default to teams for root
+    return "teams"; // Default fallback
   };
 
   const currentTab = getCurrentTab();
