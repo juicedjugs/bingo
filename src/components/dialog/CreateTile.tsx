@@ -179,37 +179,6 @@ const TilePreview = ({
               ))}
             </text>
           )}
-
-          {/* Time indicator badge */}
-          {state.showTimeIndicators && timeToComplete !== "" && (
-            <g>
-              <rect
-                x={4}
-                y={size - 24}
-                width={Math.max(32, timeToComplete.toString().length * 8 + 16)}
-                height={16}
-                rx={8}
-                fill="hsla(120, 100.00%, 76.70%, 0.00)"
-                stroke="rgba(255, 255, 255, 00)"
-                strokeWidth="1"
-              />
-              <text
-                x={
-                  4 +
-                  Math.max(32, timeToComplete.toString().length * 8 + 16) / 2
-                }
-                y={size - 12}
-                textAnchor="middle"
-                dominantBaseline="top"
-                fontSize={10}
-                fill="#a0a0a0"
-                fontFamily="inherit"
-                fontWeight="bold"
-                style={{ pointerEvents: "none", userSelect: "none" }}>
-                {timeToComplete}h
-              </text>
-            </g>
-          )}
         </svg>
       </Box>
     </Box>

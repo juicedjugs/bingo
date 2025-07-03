@@ -89,7 +89,40 @@ const TileIdeaItem = memo(({ tileIdea, idx }: TileIdeaItemProps) => {
           borderBottom: "1px solid #ffffff20",
           position: "relative",
         }}>
-        <Typography variant="subtitle2">{tileIdea.description}</Typography>
+        <Box
+          sx={{ display: "flex", flexDirection: "column", gap: 0.5, flex: 1 }}>
+          <Typography variant="subtitle2">{tileIdea.description}</Typography>
+          {tileIdea.timeToComplete && (
+            <Box
+              sx={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 0.5,
+                px: 1,
+                py: 0.25,
+                borderRadius: 1,
+                backgroundColor: "rgba(160, 160, 160, 0.1)",
+                border: "1px solid rgba(160, 160, 160, 0.2)",
+                alignSelf: "flex-start",
+              }}>
+              <Icon
+                icon="mdi:clock-outline"
+                width={12}
+                height={12}
+                color="#a0a0a0"
+              />
+              <Typography
+                variant="caption"
+                sx={{
+                  color: "#a0a0a0",
+                  fontWeight: "bold",
+                  fontSize: "0.7rem",
+                }}>
+                {tileIdea.timeToComplete}h
+              </Typography>
+            </Box>
+          )}
+        </Box>
         <Box
           sx={{
             display: "flex",
