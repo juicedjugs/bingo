@@ -93,7 +93,7 @@ const TileIdeaItem = memo(({ tileIdea, idx }: TileIdeaItemProps) => {
           sx={{ display: "flex", flexDirection: "column", gap: 0.5, flex: 1 }}>
           <Typography variant="subtitle2">{tileIdea.description}</Typography>
           <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 1 }}>
-            {tileIdea.timeToComplete && (
+            {
               <Box
                 sx={{
                   display: "inline-flex",
@@ -118,10 +118,10 @@ const TileIdeaItem = memo(({ tileIdea, idx }: TileIdeaItemProps) => {
                     fontWeight: "bold",
                     fontSize: "0.7rem",
                   }}>
-                  {tileIdea.timeToComplete}h
+                  {tileIdea.timeToComplete ?? 1}h
                 </Typography>
               </Box>
-            )}
+            }
             <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
               {tileIdea.items
                 .filter((item: string, itemIdx: number) => itemIdx < 3)
