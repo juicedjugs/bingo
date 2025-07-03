@@ -222,7 +222,7 @@ function BingoTimeSummary({
             fontWeight: "bold",
             fontSize: Math.max(10, tileSize * 0.06),
           }}>
-          {formatTime(mainDiagTotal)}
+          {formatTime(antiDiagTotal)}
         </Typography>
       </Box>
 
@@ -244,7 +244,7 @@ function BingoTimeSummary({
             fontWeight: "bold",
             fontSize: Math.max(10, tileSize * 0.06),
           }}>
-          {formatTime(antiDiagTotal)}
+          {formatTime(mainDiagTotal)}
         </Typography>
       </Box>
     </Box>
