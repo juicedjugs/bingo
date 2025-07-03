@@ -14,7 +14,12 @@ import { BingoBoardTile } from "./BingoBoardTile";
 import { getItemImgURL } from "../../utils/getItemImgURL";
 
 export default function BoardView() {
-  const { state, reorderBingoBoard, assignTileIdeaToBingoTile } = useAppState();
+  const {
+    state,
+    reorderBingoBoard,
+    assignTileIdeaToBingoTile,
+    clearBingoTile,
+  } = useAppState();
   const { tileIdeas } = useTileIdeas();
   const [activeDrag, setActiveDrag] = useState<any>(null);
   const [activeType, setActiveType] = useState<string | null>(null);
@@ -75,6 +80,16 @@ export default function BoardView() {
       if (fromIndex !== toIndex) {
         reorderBingoBoard(fromIndex, toIndex);
       }
+    }
+
+    // Bingo tile dropped on unassign area (tile ideas list)
+    if (
+      active.id.toString().startsWith("bingo-") &&
+      over.id.toString() === "unassign-tile-ideas"
+    ) {
+      const tileIndex = Number(active.id.toString().replace("bingo-", ""));
+      // Clear the bingo tile (unassign it)
+      clearBingoTile(tileIndex);
     }
   };
 

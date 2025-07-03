@@ -92,57 +92,53 @@ const TileIdeaItem = memo(({ tileIdea, idx }: TileIdeaItemProps) => {
         <Box
           sx={{ display: "flex", flexDirection: "column", gap: 0.5, flex: 1 }}>
           <Typography variant="subtitle2">{tileIdea.description}</Typography>
-          {tileIdea.timeToComplete && (
-            <Box
-              sx={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 0.5,
-                px: 1,
-                py: 0.25,
-                borderRadius: 1,
-                backgroundColor: "rgba(160, 160, 160, 0.1)",
-                border: "1px solid rgba(160, 160, 160, 0.2)",
-                alignSelf: "flex-start",
-              }}>
-              <Icon
-                icon="mdi:clock-outline"
-                width={12}
-                height={12}
-                color="#a0a0a0"
-              />
-              <Typography
-                variant="caption"
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 1 }}>
+            {tileIdea.timeToComplete && (
+              <Box
                 sx={{
-                  color: "#a0a0a0",
-                  fontWeight: "bold",
-                  fontSize: "0.7rem",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 0.5,
+                  px: 1,
+                  py: 0.25,
+                  borderRadius: 1,
+                  backgroundColor: "rgba(160, 160, 160, 0.1)",
+                  border: "1px solid rgba(160, 160, 160, 0.2)",
                 }}>
-                {tileIdea.timeToComplete}h
-              </Typography>
-            </Box>
-          )}
-        </Box>
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "row",
-            alignItems: "center",
-          }}>
-          {tileIdea.items
-            .filter((item: string, itemIdx: number) => itemIdx < 3)
-            .map((item: string) => (
-              <Tooltip title={item} arrow key={item}>
-                <img
-                  style={{
-                    filter: "drop-shadow(0 0 2px #000000)",
-                  }}
-                  src={getItemImgURL(item)}
-                  alt={tileIdea.description}
-                  height={28}
+                <Icon
+                  icon="mdi:clock-outline"
+                  width={12}
+                  height={12}
+                  color="#a0a0a0"
                 />
-              </Tooltip>
-            ))}
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: "#a0a0a0",
+                    fontWeight: "bold",
+                    fontSize: "0.7rem",
+                  }}>
+                  {tileIdea.timeToComplete}h
+                </Typography>
+              </Box>
+            )}
+            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+              {tileIdea.items
+                .filter((item: string, itemIdx: number) => itemIdx < 3)
+                .map((item: string) => (
+                  <Tooltip title={item} arrow key={item}>
+                    <img
+                      style={{
+                        filter: "drop-shadow(0 0 2px #000000)",
+                      }}
+                      src={getItemImgURL(item)}
+                      alt={tileIdea.description}
+                      height={20}
+                    />
+                  </Tooltip>
+                ))}
+            </Box>
+          </Box>
         </Box>
 
         {/* Hover icons */}
