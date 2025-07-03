@@ -15,6 +15,207 @@ import { useState, useEffect } from "react";
 import { getItemImgURL } from "../../utils/getItemImgURL";
 import { nanoid } from "nanoid";
 
+// Preview component that mimics BingoBoardTile rendering
+const TilePreview = ({
+  description,
+  items,
+  timeToComplete,
+}: {
+  description: string;
+  items: string[];
+  timeToComplete: number | "";
+}) => {
+  const { state } = useAppState();
+  const size = 150;
+
+  // Helper to wrap text into lines that fit the tile width
+  function wrapText(
+    text: string,
+    maxWidth: number,
+    fontSize: number,
+    fontFamily = "inherit",
+  ) {
+    if (!text) return [];
+    const words = text.split(" ");
+    const lines: string[] = [];
+    let currentLine = words[0] || "";
+
+    // Create a temporary SVG text element to measure text width
+    if (typeof window !== "undefined") {
+      const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      const textElem = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "text",
+      );
+      textElem.setAttribute("font-size", fontSize.toString());
+      textElem.setAttribute("font-family", fontFamily);
+      svg.appendChild(textElem);
+      document.body.appendChild(svg);
+
+      for (let i = 1; i < words.length; i++) {
+        const testLine = currentLine + " " + words[i];
+        textElem.textContent = testLine;
+        const width = textElem.getBBox().width;
+        if (width > maxWidth) {
+          lines.push(currentLine);
+          currentLine = words[i];
+        } else {
+          currentLine = testLine;
+        }
+      }
+      lines.push(currentLine);
+      document.body.removeChild(svg);
+    } else {
+      // SSR fallback: just break every 6 words
+      for (let i = 1; i < words.length; i++) {
+        if (i % 6 === 0) {
+          lines.push(currentLine);
+          currentLine = words[i];
+        } else {
+          currentLine += " " + words[i];
+        }
+      }
+      lines.push(currentLine);
+    }
+    return lines;
+  }
+
+  // Filter out empty items for accurate layout calculation
+  const validItems = items.filter((item) => item.trim().length > 0);
+
+  // Layout: images in a row at the top, description text below
+  const imageSize = size * 0.28;
+  const imageSpacing = validItems.length === 3 ? size * 0.015 : size * 0.04;
+  const numImages = Math.min(validItems.length, 3);
+  const totalImagesWidth =
+    numImages * imageSize + (numImages - 1) * imageSpacing;
+  const imagesStartX = (size - totalImagesWidth) / 2;
+
+  // Try to fit text: reduce font size if too many lines
+  let descFontSize = size * 0.13;
+  let lines = wrapText(description, size * 0.85, descFontSize);
+  while (
+    lines.length * descFontSize > size * 0.35 &&
+    descFontSize > size * 0.07
+  ) {
+    descFontSize *= 0.92;
+    lines = wrapText(description, size * 0.85, descFontSize);
+  }
+
+  // Vertical centering logic
+  const textBlockHeight = lines.length * descFontSize;
+  const imagesBlockHeight = validItems.length === 0 ? 0 : imageSize;
+  const spacingBetweenImagesAndText = validItems.length === 0 ? 0 : size * 0.08;
+  const totalContentHeight =
+    imagesBlockHeight + spacingBetweenImagesAndText + textBlockHeight;
+  const contentStartY = (size - totalContentHeight) / 2;
+  const imageY = contentStartY;
+  const textYStart =
+    contentStartY +
+    imagesBlockHeight +
+    spacingBetweenImagesAndText +
+    descFontSize;
+
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        mb: 3,
+        p: 2,
+        border: "1px solid #333",
+        borderRadius: 1,
+        backgroundColor: "#1a1a1a",
+      }}>
+      <Typography variant="subtitle2" sx={{ mb: 2, color: "#888" }}>
+        Tile Preview
+      </Typography>
+      <Box
+        sx={{
+          border: "1px solid #000",
+          width: size,
+          height: size,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: "#181818",
+          position: "relative",
+        }}>
+        <svg width={size} height={size} style={{ display: "block" }}>
+          {/* Item images */}
+          {validItems.slice(0, 3).map((item, idx) => {
+            const itemName = item.trim();
+            return (
+              <image
+                key={`${itemName}-${idx}`}
+                href={getItemImgURL(itemName)}
+                x={imagesStartX + idx * (imageSize + imageSpacing)}
+                y={imageY}
+                width={imageSize}
+                height={imageSize}
+                style={{ filter: "drop-shadow(0 0 2px #000000)" }}
+              />
+            );
+          })}
+
+          {/* Description text */}
+          {description && (
+            <text
+              x={size / 2}
+              y={textYStart}
+              textAnchor="middle"
+              fontSize={descFontSize}
+              fill="#ccc"
+              fontFamily="inherit"
+              style={{ pointerEvents: "none", userSelect: "none" }}>
+              {lines.map((line, i) => (
+                <tspan
+                  x={size / 2}
+                  dy={i === 0 ? 0 : descFontSize * 1.1}
+                  key={i}>
+                  {line}
+                </tspan>
+              ))}
+            </text>
+          )}
+
+          {/* Time indicator badge */}
+          {state.showTimeIndicators && timeToComplete !== "" && (
+            <g>
+              <rect
+                x={4}
+                y={size - 24}
+                width={Math.max(32, timeToComplete.toString().length * 8 + 16)}
+                height={16}
+                rx={8}
+                fill="hsla(120, 100.00%, 76.70%, 0.00)"
+                stroke="rgba(255, 255, 255, 00)"
+                strokeWidth="1"
+              />
+              <text
+                x={
+                  4 +
+                  Math.max(32, timeToComplete.toString().length * 8 + 16) / 2
+                }
+                y={size - 12}
+                textAnchor="middle"
+                dominantBaseline="top"
+                fontSize={10}
+                fill="#a0a0a0"
+                fontFamily="inherit"
+                fontWeight="bold"
+                style={{ pointerEvents: "none", userSelect: "none" }}>
+                {timeToComplete}h
+              </text>
+            </g>
+          )}
+        </svg>
+      </Box>
+    </Box>
+  );
+};
+
 const CreateTileIdea = () => {
   const {
     state,
@@ -101,12 +302,37 @@ const CreateTileIdea = () => {
     handleClose();
   };
 
+  const moveItemUp = (index: number) => {
+    if (index === 0) return;
+    const newItems = [...items];
+    [newItems[index - 1], newItems[index]] = [
+      newItems[index],
+      newItems[index - 1],
+    ];
+    setItems(newItems);
+  };
+
+  const moveItemDown = (index: number) => {
+    if (index === items.length - 1) return;
+    const newItems = [...items];
+    [newItems[index], newItems[index + 1]] = [
+      newItems[index + 1],
+      newItems[index],
+    ];
+    setItems(newItems);
+  };
+
   return (
     <Dialog open={state.openCreateTileDialog}>
       <DialogTitle sx={{ textAlign: "center" }}>
         {editingTile ? "Edit Tile" : "Create Tile Idea"}
       </DialogTitle>
       <DialogContent sx={{ p: 4 }}>
+        <TilePreview
+          description={itemDescription}
+          items={items.map((item) => item.name)}
+          timeToComplete={timeToComplete}
+        />
         <TextareaAutosize
           value={itemDescription}
           onChange={(e) => setItemDescription(e.target.value)}
@@ -115,8 +341,9 @@ const CreateTileIdea = () => {
             fontFamily: "var(--font-family)",
             padding: 12,
             fontSize: 15,
-            minWidth: 300,
+            width: "100%",
             minHeight: 100,
+            boxSizing: "border-box",
           }}
         />
         <Box sx={{ mt: 2 }}>
@@ -144,7 +371,6 @@ const CreateTileIdea = () => {
               min: 0,
               step: 0.5,
             }}
-            sx={{ maxWidth: 200 }}
           />
         </Box>
         <Box>
@@ -219,9 +445,28 @@ const CreateTileIdea = () => {
                   onClick={() => {
                     setItems((items) => items.filter((_, i) => i !== idx));
                   }}
-                  sx={{ minWidth: 0, ml: 1, py: 1 }}>
+                  sx={{ minWidth: 0, ml: 1, py: 1, px: 1 }}>
                   <Icon icon="mdi:trash" width={20} height={20} />
                 </Button>
+                <Box
+                  sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    onClick={() => moveItemUp(idx)}
+                    disabled={idx === 0}
+                    sx={{ minWidth: 0, px: 1, py: 0 }}>
+                    <Icon icon="mdi:chevron-up" width={16} height={16} />
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    onClick={() => moveItemDown(idx)}
+                    disabled={idx === items.length - 1}
+                    sx={{ minWidth: 0, px: 1, py: 0 }}>
+                    <Icon icon="mdi:chevron-down" width={16} height={16} />
+                  </Button>
+                </Box>
               </Box>
             ))}
             <Button
