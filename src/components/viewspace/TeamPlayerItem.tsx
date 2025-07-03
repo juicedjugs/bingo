@@ -6,6 +6,7 @@ import getUserStats, {
 } from "../../utils/getUserStats";
 import PlayerCard from "./PlayerCard";
 import { Player } from "./types";
+import { useAppState } from "../../state";
 
 export interface TeamPlayerItemProps {
   player: Player;
@@ -27,6 +28,7 @@ const TeamPlayerItem = memo(
     const [isLoading, setIsLoading] = useState(true);
     const [hasError, setHasError] = useState(false);
     const [stats, setStats] = useState<UserStats | null>(null);
+    const { assignPlayerToTeam } = useAppState();
 
     useEffect(() => {
       const fetchCombatLevel = async () => {
@@ -119,6 +121,7 @@ const TeamPlayerItem = memo(
           dragListeners={isClient ? listeners : undefined}
           dragAttributes={isClient ? attributes : undefined}
           isDropTarget={isClient && isOver}
+          onUnassign={() => assignPlayerToTeam(index, null)}
         />
       </div>
     );

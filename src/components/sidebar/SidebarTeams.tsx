@@ -17,6 +17,7 @@ import PlayerItem from "./SidebarTeamsPlayerItem";
 import TeamItem from "./SidebarTeamsTeamItem";
 import UnassignDroppable from "./SidebarTeamsUnassignDroppable";
 import SnackbarNotification from "./SnackbarNotification";
+import BossIconFilterDialog from "./BossIconFilterDialog";
 
 const SidebarTeams = () => {
   const {
@@ -32,6 +33,7 @@ const SidebarTeams = () => {
   const [newPlayerName, setNewPlayerName] = useState("");
   const [isClient, setIsClient] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
+  const [openBossFilter, setOpenBossFilter] = useState(false);
 
   // Snackbar state
   const [snackbar, setSnackbar] = useState({
@@ -199,6 +201,17 @@ const SidebarTeams = () => {
 
   return (
     <>
+      <Button
+        variant="outlined"
+        size="small"
+        sx={{ m: 2, mb: 0 }}
+        onClick={() => setOpenBossFilter(true)}>
+        Boss Icon Filter
+      </Button>
+      <BossIconFilterDialog
+        open={openBossFilter}
+        onClose={() => setOpenBossFilter(false)}
+      />
       {/* Teams Section - Simple list for team management */}
       <ListSubheader>Teams ({getTeamsCount()})</ListSubheader>
 

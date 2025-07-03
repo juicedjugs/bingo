@@ -1,0 +1,111 @@
+import fs from "fs/promises";
+
+const ICON_MAP = {
+  bountyhunterhunter: "Bounty Hunter - Hunter",
+  bountyhunterrogue: "Bounty Hunter - Rogue",
+  bountyhunterlegacyhunter: "Bounty Hunter (Legacy) - Hunter",
+  bountyhunterlegacyrogue: "Bounty Hunter (Legacy) - Rogue",
+  cluescrollsall: "Clue Scrolls (all)",
+  cluescrollsbeginner: "Clue Scrolls (beginner)",
+  cluescrollseasy: "Clue Scrolls (easy)",
+  cluescrollsmedium: "Clue Scrolls (medium)",
+  cluescrollshard: "Clue Scrolls (hard)",
+  cluescrollselite: "Clue Scrolls (elite)",
+  cluescrollsmaster: "Clue Scrolls (master)",
+  lmsrank: "LMS - Rank",
+  pvparenarank: "PvP Arena - Rank",
+  soulwarszeal: "Soul Wars Zeal",
+  riftsclosed: "Rifts Closed",
+  colosseumglory: "Colosseum Glory",
+  collectionslogged: "Collections Logged",
+  abyssalsire: "Abyssal Sire",
+  alchemicalhydra: "Alchemical Hydra",
+  amoxliatl: "Amoxliatl",
+  araxxor: "Araxxor",
+  artio: "Artio",
+  barrowschests: "Barrows Chests",
+  bryophyta: "Bryophyta",
+  callisto: "Callisto",
+  calvarion: "Calvarion",
+  cerberus: "Cerberus",
+  chambersofxeric: "Chambers of Xeric",
+  chambersofxericchallengemode: "Chambers of Xeric: Challenge Mode",
+  chaoselemental: "Chaos Elemental",
+  chaosfanatic: "Chaos Fanatic",
+  commanderzilyana: "Commander Zilyana",
+  corporealbeast: "Corporeal Beast",
+  crazyarchaeologist: "Crazy Archaeologist",
+  dagannothprime: "Dagannoth Prime",
+  dagannothrex: "Dagannoth Rex",
+  dagannothsupreme: "Dagannoth Supreme",
+  derangedarchaeologist: "Deranged Archaeologist",
+  dukesucellus: "Duke Sucellus",
+  generalgraardor: "General Graardor",
+  giantmole: "Giant Mole",
+  grotesqueguardians: "Grotesque Guardians",
+  hespori: "Hespori",
+  kalphitequeen: "Kalphite Queen",
+  kingblackdragon: "King Black Dragon",
+  kraken: "Kraken",
+  kreearra: "Kree'arra",
+  kriltsutsaroth: "Kril'tsutsaroth",
+  lunarchests: "Lunar Chests",
+  mimic: "Mimic",
+  nex: "Nex",
+  nightmare: "Nightmare",
+  phosanisnightmare: "Phosani's Nightmare",
+  obor: "Obor",
+  phantommuspah: "Phantom Muspah",
+  sarachnis: "Sarachnis",
+  scorpia: "Scorpia",
+  scurrius: "Scurrius",
+  skotizo: "Skotizo",
+  solheredit: "Sol Heredit",
+  spindel: "Spindel",
+  tempoross: "Tempoross",
+  thegauntlet: "The Gauntlet",
+  thecorruptedgauntlet: "The Corrupted Gauntlet",
+  thehueycoatl: "The Hueycoatl",
+  theleviathan: "The Leviathan",
+  thewhisperer: "The Whisperer",
+  theatreofblood: "Theatre of Blood",
+  theatreofbloodhardmode: "Theatre of Blood: Hard Mode",
+  thermonuclearsmokedevil: "Thermonuclear Smoke Devil",
+  tombsofamascut: "Tombs of Amascut",
+  tombsofamascutexpertmode: "Tombs of Amascut: Expert Mode",
+  tzkalzuk: "TzKal-Zuk",
+  tztokjad: "TzTok-Jad",
+  vardorvis: "Vardorvis",
+  venenatis: "Venenatis",
+  vetion: "Vet'ion",
+  vorkath: "Vorkath",
+  wintertodt: "Wintertodt",
+  yama: "Yama",
+  zalcano: "Zalcano",
+  zulrah: "Zulrah",
+};
+
+const scrapeIcons = async () => {
+  const baseURL = `https://www.runescape.com/img/rsp777/game_icon_`;
+  const ending = `.png?2`;
+
+  for (const [key] of Object.entries(ICON_MAP)) {
+    const url = `${baseURL}${key}${ending}`;
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      console.error(`Failed to fetch ${url}: ${response.statusText}`);
+      continue;
+    }
+
+    // Read the response as an ArrayBuffer, then convert to Buffer
+    const arrayBuffer = await response.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+
+    const filePath = `public/game_icon_${key}.png`;
+    await fs.writeFile(filePath, buffer);
+    console.log(`Saved ${key} to ${filePath}`);
+  }
+};
+
+scrapeIcons();

@@ -2,7 +2,11 @@ import React, { memo } from "react";
 import { Box, Card, CardContent, Tooltip } from "@mui/material";
 import { Icon } from "@iconify/react";
 import { UserStats } from "../../utils/getUserStats";
-import { IMPORTANT_STATS } from "./constants";
+import ICON_MAP from "./icon_map";
+import {
+  loadBossFilter,
+  getDefaultBossKeys,
+} from "../sidebar/BossIconFilterDialog";
 
 export interface PlayerCardProps {
   username: string;
@@ -13,6 +17,14 @@ export interface PlayerCardProps {
   dragListeners?: any;
   dragAttributes?: any;
   isDropTarget?: boolean;
+  onUnassign?: () => void;
+}
+
+function normalizeKey(str: string) {
+  return str
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "")
+    .replace(/\(.*?\)/g, "");
 }
 
 const PlayerCard = memo(
@@ -25,6 +37,7 @@ const PlayerCard = memo(
     dragListeners,
     dragAttributes,
     isDropTarget = false,
+    onUnassign,
   }: PlayerCardProps) => {
     const displayText = () => {
       if (isLoading) return "Loading...";
@@ -33,10 +46,19 @@ const PlayerCard = memo(
       return "Unknown";
     };
 
+    // Show all activities, matching icons by name, but exclude League/Deadman Points
+    const selectedBossKeys =
+      typeof window !== "undefined" ? loadBossFilter() : getDefaultBossKeys();
+    const activities = (stats?.activities || [])
+      .filter((activity) => !/league|deadman/i.test(activity.name))
+      .filter((activity) =>
+        selectedBossKeys.includes(normalizeKey(activity.name)),
+      );
+
     return (
       <Card
         sx={{
-          maxWidth: 240,
+          maxWidth: 320,
           position: "relative",
           border: isDropTarget ? "2px solid #64b5f6" : "none",
           backgroundColor: isDropTarget
@@ -66,7 +88,10 @@ const PlayerCard = memo(
             "&:active": {
               cursor: "grabbing",
             },
-          }}>
+          }}
+          onDoubleClick={
+            typeof onUnassign === "function" ? onUnassign : undefined
+          }>
           <Icon icon="mdi:drag" width={20} height={20} color="#fff" />
         </Box>
 
@@ -81,41 +106,47 @@ const PlayerCard = memo(
             {username} ({displayText()})
           </Box>
           <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", mt: 2 }}>
-            {/* Important Stats */}
-            {IMPORTANT_STATS.map((stat, idx) => (
-              <Tooltip key={stat.id} title={`${stat.name}`}>
-                <Box key={stat.id} sx={{ display: "flex" }}>
-                  <Box
-                    sx={{
-                      height: 20,
-                      width: 20,
-                      padding: 2,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}>
-                    <img src={stat.iconPath} alt={stat.name} />
-                  </Box>
+            {/* All Activities */}
+            {activities.map((activity) => {
+              const key = normalizeKey(activity.name);
+              const iconLabel = (ICON_MAP as Record<string, string>)[key];
+              const iconPath = iconLabel ? `game_icon_${key}.png` : undefined;
+              return (
+                <Tooltip key={activity.name} title={iconLabel || activity.name}>
                   <Box
                     sx={{
                       display: "flex",
-                      width: 40,
                       alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: 14,
+                      gap: 0.5,
+                      minWidth: 80,
                     }}>
-                    {(() => {
-                      const value =
-                        idx === 0
-                          ? stats?.skills[0]?.level
-                          : stats?.activities.find((a) => a.id === stat.id)
-                              ?.score;
-                      return value === -1 ? "--" : value;
-                    })()}
+                    {iconPath ? (
+                      <Box
+                        sx={{
+                          height: 20,
+                          width: 20,
+                          padding: 2,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}>
+                        <img src={iconPath} alt={iconLabel || activity.name} />
+                      </Box>
+                    ) : null}
+                    <Box
+                      sx={{
+                        display: "flex",
+                        width: 40,
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: 14,
+                      }}>
+                      {activity.score === -1 ? "--" : activity.score}
+                    </Box>
                   </Box>
-                </Box>
-              </Tooltip>
-            ))}
+                </Tooltip>
+              );
+            })}
           </Box>
         </CardContent>
       </Card>

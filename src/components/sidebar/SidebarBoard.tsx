@@ -1,8 +1,15 @@
-import { Divider, ListSubheader } from "@mui/material";
+import {
+  Divider,
+  ListSubheader,
+  Button,
+  IconButton,
+  Tooltip,
+} from "@mui/material";
 import { useState, useEffect } from "react";
 import { useTileIdeas } from "../../state";
 import type { TileIdea } from "../../state";
 import Fuse from "fuse.js";
+import { Icon } from "@iconify/react";
 
 // Import the decomposed components
 import BoardControls from "./BoardControls";
@@ -12,12 +19,14 @@ import TileIdeasSearch from "./TileIdeasSearch";
 import TileIdeasList from "./TileIdeasList";
 import SnackbarNotification from "./SnackbarNotification";
 import ExportPng from "../dialog/ExportPng";
+import BossIconFilterDialog from "./BossIconFilterDialog";
 
 const SidebarBoard = () => {
   const { tileIdeas } = useTileIdeas();
 
   const [search, setSearch] = useState("");
   const [isHydrated, setIsHydrated] = useState(false);
+  const [openBossFilter, setOpenBossFilter] = useState(false);
 
   // Snackbar state
   const [snackbar, setSnackbar] = useState({
@@ -69,6 +78,18 @@ const SidebarBoard = () => {
       <Divider sx={{ my: 1 }} />
       <TileIdeasHeader showSnackbar={showSnackbar} />
       <TileIdeasSearch search={search} onSearchChange={setSearch} />
+      <Tooltip title="Boss Icon Filter">
+        <IconButton
+          size="small"
+          sx={{ mx: 1, mb: 1 }}
+          onClick={() => setOpenBossFilter(true)}>
+          <Icon icon="mdi:filter" width={20} height={20} />
+        </IconButton>
+      </Tooltip>
+      <BossIconFilterDialog
+        open={openBossFilter}
+        onClose={() => setOpenBossFilter(false)}
+      />
       <TileIdeasList filteredTileIdeas={filteredTileIdeas} />
       <SnackbarNotification snackbar={snackbar} onClose={handleSnackbarClose} />
       <ExportPng />

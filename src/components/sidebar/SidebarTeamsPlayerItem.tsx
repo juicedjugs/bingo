@@ -102,7 +102,8 @@ const PlayerItem = memo(
                   color: "text.secondary",
                   "&:hover": { color: "primary.main" },
                   "&:active": { cursor: isHydrated ? "grabbing" : "default" },
-                }}>
+                }}
+                onDoubleClick={() => onRemove(playerIndex)}>
                 <Icon icon="mdi:drag" width={16} />
               </IconButton>
             </Tooltip>
