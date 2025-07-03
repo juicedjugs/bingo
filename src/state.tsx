@@ -16,6 +16,7 @@ export type Action =
   | { type: "SET_SCALE"; payload: number }
   | { type: "SET_OPEN_CREATE_TILE_DIALOG"; payload: boolean }
   | { type: "SET_OPEN_PNG_EXPORT_DIALOG"; payload: boolean }
+  | { type: "SET_SHOW_TIME_INDICATORS"; payload: boolean }
   | { type: "REORDER_BINGO_BOARD"; payload: { from: number; to: number } }
   | {
       type: "ASSIGN_TILE_IDEA_TO_BINGO_TILE";
@@ -57,6 +58,7 @@ export interface State {
   bingoBoard: { id: string | null }[];
   openCreateTileDialog: boolean;
   openPngExportDialog: boolean;
+  showTimeIndicators: boolean;
   editingTileId: string | null;
   creatingForBoardIndex: number | null;
   players: { username: string; teamId: string | null }[];
@@ -69,6 +71,7 @@ const initialState: State = {
   scale: 100,
   openCreateTileDialog: false,
   openPngExportDialog: false,
+  showTimeIndicators: true,
   bingoBoard: Array.from({ length: 5 ** 2 }, () => ({ id: null })),
   editingTileId: null,
   creatingForBoardIndex: null,
@@ -178,6 +181,11 @@ function stateReducer(state: State, action: Action): State {
       return {
         ...state,
         openPngExportDialog: action.payload,
+      };
+    case "SET_SHOW_TIME_INDICATORS":
+      return {
+        ...state,
+        showTimeIndicators: action.payload,
       };
     case "REORDER_BINGO_BOARD": {
       const { from, to } = action.payload;
@@ -339,6 +347,7 @@ export interface StateContextType {
   setScale: (scale: number) => void;
   setOpenCreateTileDialog: (open: boolean) => void;
   setOpenPngExportDialog: (open: boolean) => void;
+  setShowTimeIndicators: (show: boolean) => void;
   reorderBingoBoard: (from: number, to: number) => void;
   assignTileIdeaToBingoTile: (tileIndex: number, tileIdeaId: string) => void;
   clearBingoTile: (tileIndex: number) => void;
@@ -400,6 +409,9 @@ export function StateProvider({ children }: { children: ReactNode }) {
     },
     setOpenPngExportDialog: (open: boolean) => {
       dispatch({ type: "SET_OPEN_PNG_EXPORT_DIALOG", payload: open });
+    },
+    setShowTimeIndicators: (show: boolean) => {
+      dispatch({ type: "SET_SHOW_TIME_INDICATORS", payload: show });
     },
     reorderBingoBoard: (from: number, to: number) => {
       dispatch({ type: "REORDER_BINGO_BOARD", payload: { from, to } });
@@ -473,6 +485,7 @@ export type TileIdea = {
   id: string;
   items: string[];
   description: string;
+  timeToComplete?: number; // Optional time in hours
 };
 
 type TileIdeasAction =

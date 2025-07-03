@@ -25,6 +25,7 @@ const CreateTileIdea = () => {
   } = useAppState();
   const { tileIdeas, addTileIdea, updateTileIdea } = useTileIdeas();
   const [itemDescription, setItemDescription] = useState("");
+  const [timeToComplete, setTimeToComplete] = useState<number | "">("");
   const [items, setItems] = useState([
     { name: "", previewImgURL: null as string | null },
   ]);
@@ -38,6 +39,7 @@ const CreateTileIdea = () => {
   useEffect(() => {
     if (editingTile) {
       setItemDescription(editingTile.description);
+      setTimeToComplete(editingTile.timeToComplete ?? "");
       setItems(
         editingTile.items.length > 0
           ? editingTile.items.map((item: string) => ({
@@ -49,6 +51,7 @@ const CreateTileIdea = () => {
     } else {
       // Reset form when creating new tile
       setItemDescription("");
+      setTimeToComplete("");
       setItems([{ name: "", previewImgURL: null }]);
     }
   }, [editingTile]);
@@ -58,6 +61,7 @@ const CreateTileIdea = () => {
     setEditingTileId(null);
     setCreatingForBoardIndex(null);
     setItemDescription("");
+    setTimeToComplete("");
     setItems([{ name: "", previewImgURL: null }]);
   };
 
@@ -68,20 +72,24 @@ const CreateTileIdea = () => {
       .map((item) => item.name.trim())
       .filter((name) => name.length > 0);
 
+    const tileData = {
+      items: validItems,
+      description: desc,
+      ...(timeToComplete !== "" && { timeToComplete: Number(timeToComplete) }),
+    };
+
     if (editingTile) {
       // Update existing tile
       updateTileIdea({
         id: editingTile.id,
-        items: validItems,
-        description: desc,
+        ...tileData,
       });
     } else {
       // Create new tile
       const newTileId = nanoid();
       addTileIdea({
         id: newTileId,
-        items: validItems,
-        description: desc,
+        ...tileData,
       });
 
       // If we're creating for a specific board position, assign it
@@ -111,6 +119,34 @@ const CreateTileIdea = () => {
             minHeight: 100,
           }}
         />
+        <Box sx={{ mt: 2 }}>
+          <Typography variant="subtitle2" sx={{ mb: 1 }}>
+            Time to Complete (hours) - Optional
+          </Typography>
+          <TextField
+            type="number"
+            size="small"
+            fullWidth
+            placeholder="e.g., 2.5"
+            value={timeToComplete === "" ? "" : timeToComplete}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value === "") {
+                setTimeToComplete("");
+              } else {
+                const numValue = parseFloat(value);
+                if (!isNaN(numValue) && numValue >= 0) {
+                  setTimeToComplete(numValue);
+                }
+              }
+            }}
+            inputProps={{
+              min: 0,
+              step: 0.5,
+            }}
+            sx={{ maxWidth: 200 }}
+          />
+        </Box>
         <Box>
           <Typography variant="subtitle2" sx={{ my: 2 }}>
             Items

@@ -3,7 +3,7 @@ import { useDroppable, useDndContext } from "@dnd-kit/core";
 import { Icon } from "@iconify/react";
 import { useState } from "react";
 import { getItemImgURL } from "../../utils/getItemImgURL";
-import { useAppState } from "../../state";
+import { useAppState, useTileIdeas } from "../../state";
 
 interface BingoBoardTileProps {
   id: string;
@@ -37,11 +37,13 @@ export const BingoBoardTile = ({
   const { setNodeRef, isOver } = useDroppable({ id });
   const { active } = useDndContext();
   const {
+    state,
     setOpenCreateTileDialog,
     setEditingTileId,
     clearBingoTile,
     setCreatingForBoardIndex,
   } = useAppState();
+  const { tileIdeas } = useTileIdeas();
   const [isHovered, setIsHovered] = useState(false);
   const [isOverIcons, setIsOverIcons] = useState(false);
 
@@ -50,6 +52,11 @@ export const BingoBoardTile = ({
   const isBingoTileOver =
     isOver && active?.id?.toString().startsWith("bingo-") && active.id !== id;
   const size = 150 * (scale / 100);
+
+  // Get the tile idea to access timeToComplete
+  const tileIdea = tileIdeaId
+    ? tileIdeas.find((tile: any) => tile.id === tileIdeaId)
+    : null;
 
   // Layout: images in a row at the top, description text below
   const imageSize = size * 0.28; // up to 3 images, with some padding
@@ -283,6 +290,43 @@ export const BingoBoardTile = ({
             </tspan>
           ))}
         </text>
+        {/* Time indicator badge */}
+        {state.showTimeIndicators && tileIdea?.timeToComplete && (
+          <g>
+            <rect
+              x={4}
+              y={size - 24}
+              width={Math.max(
+                32,
+                tileIdea.timeToComplete.toString().length * 8 + 16,
+              )}
+              height={16}
+              rx={8}
+              fill="hsla(120, 100.00%, 76.70%, 0.00)"
+              stroke="rgba(255, 255, 255, 00)"
+              strokeWidth="1"
+            />
+            <text
+              x={
+                4 +
+                Math.max(
+                  32,
+                  tileIdea.timeToComplete.toString().length * 8 + 16,
+                ) /
+                  2
+              }
+              y={size - 12}
+              textAnchor="middle"
+              dominantBaseline="top"
+              fontSize={10}
+              fill="#a0a0a0"
+              fontFamily="inherit"
+              fontWeight="bold"
+              style={{ pointerEvents: "none", userSelect: "none" }}>
+              {tileIdea.timeToComplete}h
+            </text>
+          </g>
+        )}
       </svg>
     </Box>
   );

@@ -1,9 +1,11 @@
-import { Box, ListItem, MenuItem, Select, Slider } from "@mui/material";
+import { Box, ListItem, MenuItem, Select, Slider, Button } from "@mui/material";
+import { Icon } from "@iconify/react";
 import { useEffect } from "react";
 import { useAppState } from "../../state";
 
 const BoardControls = () => {
-  const { state, setDimension, setScale } = useAppState();
+  const { state, setDimension, setScale, setShowTimeIndicators } =
+    useAppState();
 
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
@@ -71,6 +73,38 @@ const BoardControls = () => {
             step={1}
             onChange={(e, value) => setScale(value as number)}
           />
+        </Box>
+      </Box>
+      <Box>
+        <Box
+          sx={{
+            px: 2,
+            my: 2,
+            display: "flex",
+            flexDirection: "column",
+            gap: 1,
+            width: "100%",
+          }}>
+          <Button
+            size="small"
+            variant={state.showTimeIndicators ? "contained" : "outlined"}
+            onClick={() => setShowTimeIndicators(!state.showTimeIndicators)}
+            startIcon={
+              <Icon
+                icon={
+                  state.showTimeIndicators ? "mdi:clock" : "mdi:clock-outline"
+                }
+                width={18}
+                height={18}
+              />
+            }
+            sx={{
+              justifyContent: "flex-start",
+              textTransform: "none",
+              fontSize: "0.875rem",
+            }}>
+            {state.showTimeIndicators ? "Hide Times" : "Show Times"}
+          </Button>
         </Box>
       </Box>
     </>
