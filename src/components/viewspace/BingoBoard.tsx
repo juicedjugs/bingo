@@ -87,7 +87,14 @@ function BingoTimeSummary({
   // Calculate time summaries
   const getTimeForTile = (index: number) => {
     const tile = board[index];
-    return tile?.timeToComplete || 1; // Default to 1 hour if no time specified
+    // Only count tiles that have actual content (description or items)
+    if (
+      !tile ||
+      (!tile.description && (!tile.items || tile.items.length === 0))
+    ) {
+      return 0; // Empty tiles don't contribute time
+    }
+    return tile.timeToComplete || 1; // Default to 1 hour if no time specified
   };
 
   // Row totals
