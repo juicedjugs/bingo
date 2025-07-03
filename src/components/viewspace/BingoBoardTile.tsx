@@ -291,14 +291,14 @@ export const BingoBoardTile = ({
           ))}
         </text>
         {/* Time indicator badge */}
-        {state.showTimeIndicators && tileIdea?.timeToComplete && (
+        {state.showTimeIndicators && tileIdea && (
           <g>
             <rect
               x={4}
               y={size - 24}
               width={Math.max(
                 32,
-                tileIdea.timeToComplete.toString().length * 8 + 16,
+                (tileIdea.timeToComplete || 1).toString().length * 8 + 16,
               )}
               height={16}
               rx={8}
@@ -311,7 +311,7 @@ export const BingoBoardTile = ({
                 4 +
                 Math.max(
                   32,
-                  tileIdea.timeToComplete.toString().length * 8 + 16,
+                  (tileIdea.timeToComplete || 1).toString().length * 8 + 16,
                 ) /
                   2
               }
@@ -323,7 +323,7 @@ export const BingoBoardTile = ({
               fontFamily="inherit"
               fontWeight="bold"
               style={{ pointerEvents: "none", userSelect: "none" }}>
-              {tileIdea.timeToComplete}h
+              {tileIdea.timeToComplete || 1}h
             </text>
           </g>
         )}
