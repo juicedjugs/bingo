@@ -25,6 +25,9 @@ const UnassignDroppable = ({ children }: UnassignDroppableProps) => {
         transition: "all 0.2s",
         position: "relative",
         margin: "0 16px",
+        flex: 1,
+        minHeight: 0,
+        overflow: "hidden",
       }}>
       {children}
       {shouldShowOver && (
