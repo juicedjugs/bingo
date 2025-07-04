@@ -8,6 +8,48 @@ import React, {
   useState,
 } from "react";
 import { clearExpiredUserStatsCache } from "./utils/getUserStats";
+import getUserStats, { UserStats } from "./utils/getUserStats";
+import { loadBossFilterObj } from "./components/sidebar/BossIconFilterDialog";
+
+function normalizeKey(str: string) {
+  return str
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "")
+    .replace(/\(.*?\)/g, "");
+}
+
+// Helper function to compute player weight from stats
+function computePlayerWeight(stats: UserStats): number {
+  const weights = loadBossFilterObj();
+  let score = 0;
+  if (stats && stats.activities) {
+    for (const activity of stats.activities) {
+      const key = normalizeKey(activity.name);
+      if (weights[key] && weights[key].weight > 0) {
+        score +=
+          (activity.score > 0 ? activity.score : 0) *
+          (weights[key].weight || 0);
+      }
+    }
+  }
+  return score;
+}
+
+// Helper function to fetch and store player stats
+async function fetchAndStorePlayerStats(
+  username: string,
+  setPlayerStats: (username: string, stats: UserStats, weight: number) => void,
+) {
+  try {
+    console.log(`Fetching stats for ${username}...`);
+    const stats = await getUserStats(username);
+    const weight = computePlayerWeight(stats);
+    setPlayerStats(username, stats, weight);
+    console.log(`Stored stats for ${username} with weight ${weight}`);
+  } catch (error) {
+    console.error(`Failed to fetch stats for ${username}:`, error);
+  }
+}
 
 // Actions - Modify by adding more actions with payloads.
 export type Action =
@@ -47,9 +89,18 @@ export type Action =
       payload: { playerIndex: number; teamId: string | null };
     }
   | {
+      type: "ASSIGN_PLAYER_TO_TEAM_AT_POSITION";
+      payload: { playerIndex: number; teamId: string | null; position: number };
+    }
+  | {
       type: "REORDER_PLAYERS_IN_TEAM";
       payload: { teamId: string; fromIndex: number; toIndex: number };
-    };
+    }
+  | {
+      type: "SET_PLAYER_STATS";
+      payload: { username: string; stats: UserStats; weight: number };
+    }
+  | { type: "REMOVE_PLAYER_STATS"; payload: { username: string } };
 
 // State - Modify by adding more state properties.
 export interface State {
@@ -63,6 +114,7 @@ export interface State {
   creatingForBoardIndex: number | null;
   players: { username: string; teamId: string | null }[];
   teams: { name: string }[];
+  playerStats: { [username: string]: { stats: UserStats; weight: number } };
 }
 
 // Initial State - Modify by ensuring state is correctly filled out.
@@ -77,6 +129,7 @@ const initialState: State = {
   creatingForBoardIndex: null,
   players: [],
   teams: [],
+  playerStats: {},
 };
 
 // localStorage utilities
@@ -306,6 +359,40 @@ function stateReducer(state: State, action: Action): State {
       };
       return { ...state, players: newPlayers };
     }
+    case "ASSIGN_PLAYER_TO_TEAM_AT_POSITION": {
+      const { playerIndex, teamId, position } = action.payload;
+      const newPlayers = [...state.players];
+      const playerToMove = { ...newPlayers[playerIndex] };
+
+      // Remove player from current position
+      newPlayers.splice(playerIndex, 1);
+
+      // Find the target position within the team
+      let targetIndex = 0;
+      if (teamId !== null) {
+        // Count players in the target team to find the correct position
+        let teamPlayerCount = 0;
+        for (let i = 0; i < newPlayers.length; i++) {
+          if (newPlayers[i].teamId === teamId) {
+            if (teamPlayerCount === position) {
+              targetIndex = i;
+              break;
+            }
+            teamPlayerCount++;
+          }
+        }
+        // If position is beyond current team size, add at the end
+        if (teamPlayerCount <= position) {
+          targetIndex = newPlayers.length;
+        }
+      }
+
+      // Update player's team and insert at target position
+      playerToMove.teamId = teamId;
+      newPlayers.splice(targetIndex, 0, playerToMove);
+
+      return { ...state, players: newPlayers };
+    }
     case "REORDER_PLAYERS_IN_TEAM": {
       const { teamId, fromIndex, toIndex } = action.payload;
       const newPlayers = [...state.players];
@@ -332,6 +419,25 @@ function stateReducer(state: State, action: Action): State {
       }
 
       return { ...state, players: newPlayers };
+    }
+    case "SET_PLAYER_STATS": {
+      const { username, stats, weight } = action.payload;
+      return {
+        ...state,
+        playerStats: {
+          ...state.playerStats,
+          [username]: { stats, weight },
+        },
+      };
+    }
+    case "REMOVE_PLAYER_STATS": {
+      const { username } = action.payload;
+      const newStats = { ...state.playerStats };
+      delete newStats[username];
+      return {
+        ...state,
+        playerStats: newStats,
+      };
     }
     // Add More Reducer Cases Here:
     default:
@@ -362,11 +468,18 @@ export interface StateContextType {
   editPlayer: (index: number, username: string) => void;
   removePlayer: (index: number) => void;
   assignPlayerToTeam: (playerIndex: number, teamId: string | null) => void;
+  assignPlayerToTeamAtPosition: (
+    playerIndex: number,
+    teamId: string | null,
+    position: number,
+  ) => void;
   reorderPlayersInTeam: (
     teamId: string,
     fromIndex: number,
     toIndex: number,
   ) => void;
+  setPlayerStats: (username: string, stats: UserStats, weight: number) => void;
+  removePlayerStats: (username: string) => void;
   // Add more state management method types here:
 }
 
@@ -395,6 +508,63 @@ export function StateProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     clearExpiredUserStatsCache();
   }, []);
+
+  // Define the helper functions
+  const setPlayerStats = (username: string, stats: UserStats, weight: number) =>
+    dispatch({
+      type: "SET_PLAYER_STATS",
+      payload: { username, stats, weight },
+    });
+
+  const removePlayerStats = (username: string) =>
+    dispatch({ type: "REMOVE_PLAYER_STATS", payload: { username } });
+
+  // Listen for boss filter weight changes and recompute all weights
+  useEffect(() => {
+    const STORAGE_KEY = "bingo-boss-icon-filter";
+    const handleWeightChange = async () => {
+      // Recompute weights for all players that have stats
+      for (const [username, playerData] of Object.entries(state.playerStats)) {
+        const newWeight = computePlayerWeight(playerData.stats);
+        setPlayerStats(username, playerData.stats, newWeight);
+      }
+    };
+
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === STORAGE_KEY) {
+        handleWeightChange();
+      }
+    };
+
+    // Also check for changes in this tab
+    const origSetItem = localStorage.setItem;
+    localStorage.setItem = function (...args) {
+      origSetItem.apply(this, args);
+      if (args[0] === STORAGE_KEY) {
+        handleWeightChange();
+      }
+    };
+
+    window.addEventListener("storage", onStorage);
+
+    return () => {
+      window.removeEventListener("storage", onStorage);
+      localStorage.setItem = origSetItem;
+    };
+  }, [state.playerStats]);
+
+  // Fetch stats for any players that don't have stats yet
+  useEffect(() => {
+    const fetchMissingStats = async () => {
+      for (const player of state.players) {
+        if (!state.playerStats[player.username]) {
+          await fetchAndStorePlayerStats(player.username, setPlayerStats);
+        }
+      }
+    };
+    fetchMissingStats();
+  }, [state.players, state.playerStats]);
+
   const value: StateContextType = {
     state,
     dispatch,
@@ -443,16 +613,41 @@ export function StateProvider({ children }: { children: ReactNode }) {
       dispatch({ type: "EDIT_TEAM", payload: { index, name } }),
     removeTeam: (index: number) =>
       dispatch({ type: "REMOVE_TEAM", payload: { index } }),
-    addPlayer: (username: string) =>
-      dispatch({ type: "ADD_PLAYER", payload: { username } }),
-    editPlayer: (index: number, username: string) =>
-      dispatch({ type: "EDIT_PLAYER", payload: { index, username } }),
-    removePlayer: (index: number) =>
-      dispatch({ type: "REMOVE_PLAYER", payload: { index } }),
+    addPlayer: (username: string) => {
+      dispatch({ type: "ADD_PLAYER", payload: { username } });
+      // Fetch stats for the new player
+      fetchAndStorePlayerStats(username, setPlayerStats);
+    },
+    editPlayer: (index: number, username: string) => {
+      const oldUsername = state.players[index]?.username;
+      dispatch({ type: "EDIT_PLAYER", payload: { index, username } });
+      // If username changed, remove old stats and fetch new ones
+      if (oldUsername && oldUsername !== username) {
+        removePlayerStats(oldUsername);
+        fetchAndStorePlayerStats(username, setPlayerStats);
+      }
+    },
+    removePlayer: (index: number) => {
+      const username = state.players[index]?.username;
+      dispatch({ type: "REMOVE_PLAYER", payload: { index } });
+      // Remove stats for the deleted player
+      if (username) {
+        removePlayerStats(username);
+      }
+    },
     assignPlayerToTeam: (playerIndex: number, teamId: string | null) =>
       dispatch({
         type: "ASSIGN_PLAYER_TO_TEAM",
         payload: { playerIndex, teamId },
+      }),
+    assignPlayerToTeamAtPosition: (
+      playerIndex: number,
+      teamId: string | null,
+      position: number,
+    ) =>
+      dispatch({
+        type: "ASSIGN_PLAYER_TO_TEAM_AT_POSITION",
+        payload: { playerIndex, teamId, position },
       }),
     reorderPlayersInTeam: (
       teamId: string,
@@ -463,6 +658,13 @@ export function StateProvider({ children }: { children: ReactNode }) {
         type: "REORDER_PLAYERS_IN_TEAM",
         payload: { teamId, fromIndex, toIndex },
       }),
+    setPlayerStats: (username: string, stats: UserStats, weight: number) =>
+      dispatch({
+        type: "SET_PLAYER_STATS",
+        payload: { username, stats, weight },
+      }),
+    removePlayerStats: (username: string) =>
+      dispatch({ type: "REMOVE_PLAYER_STATS", payload: { username } }),
     // Add more state management methods here:
   };
   return (

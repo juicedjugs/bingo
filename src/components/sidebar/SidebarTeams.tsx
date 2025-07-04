@@ -201,17 +201,6 @@ const SidebarTeams = () => {
 
   return (
     <>
-      <Button
-        variant="outlined"
-        size="small"
-        sx={{ m: 2, mb: 0 }}
-        onClick={() => setOpenBossFilter(true)}>
-        Boss Icon Filter
-      </Button>
-      <BossIconFilterDialog
-        open={openBossFilter}
-        onClose={() => setOpenBossFilter(false)}
-      />
       {/* Teams Section - Simple list for team management */}
       <ListSubheader>Teams ({getTeamsCount()})</ListSubheader>
 
@@ -227,7 +216,7 @@ const SidebarTeams = () => {
         <List disablePadding>{teamsList}</List>
       </ListItem>
 
-      <ListItem sx={{ display: "flex", gap: 1, my: 2, px: 2 }}>
+      <ListItem sx={{ display: "flex", gap: 1, mt: 2, px: 2 }}>
         <TextField
           placeholder="New team name"
           value={newTeamName}
@@ -236,7 +225,11 @@ const SidebarTeams = () => {
           onChange={(e) => setNewTeamName(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleAddTeam()}
         />
-        <Button variant="contained" size="small" onClick={handleAddTeam}>
+        <Button
+          variant="contained"
+          size="small"
+          onClick={handleAddTeam}
+          sx={{ py: 1 }}>
           Add
         </Button>
       </ListItem>
@@ -250,6 +243,7 @@ const SidebarTeams = () => {
           justifyContent: "space-between",
         }}>
         <span>Players ({getPlayersCount()})</span>
+
         <Box>
           <Tooltip title="Import Players from Clipboard">
             <IconButton
@@ -269,7 +263,6 @@ const SidebarTeams = () => {
           </Tooltip>
         </Box>
       </ListSubheader>
-
       <ListItem sx={{ display: "block", px: 0 }}>
         <UnassignDroppable>
           <Box
@@ -299,7 +292,7 @@ const SidebarTeams = () => {
       </ListItem>
 
       {/* This will be pushed to the bottom */}
-      <ListItem sx={{ display: "flex", gap: 1, my: 2, px: 2, mt: "auto" }}>
+      <ListItem sx={{ display: "flex", gap: 1, mt: 2, px: 2 }}>
         <TextField
           placeholder="New player username"
           value={newPlayerName}
@@ -308,7 +301,11 @@ const SidebarTeams = () => {
           onChange={(e) => setNewPlayerName(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleAddPlayer()}
         />
-        <Button variant="contained" size="small" onClick={handleAddPlayer}>
+        <Button
+          variant="contained"
+          size="small"
+          sx={{ py: 1 }}
+          onClick={handleAddPlayer}>
           Add
         </Button>
       </ListItem>

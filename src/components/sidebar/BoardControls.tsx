@@ -41,8 +41,8 @@ const BoardControls = () => {
             gap: 1,
             width: "100%",
           }}>
-          <Box>Dimension</Box>
           <Select
+            label="Dimension"
             size="small"
             value={state.dimension}
             onChange={(e) => setDimension(e.target.value)}>
@@ -67,7 +67,7 @@ const BoardControls = () => {
           <Box>Scale</Box>
           <Slider
             value={state.scale}
-            sx={{ width: "90%", mx: "auto", mb: 2 }}
+            sx={{ width: "90%", mx: "auto" }}
             min={50}
             max={200}
             step={1}

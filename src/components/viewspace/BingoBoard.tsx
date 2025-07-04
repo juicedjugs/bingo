@@ -127,7 +127,7 @@ function BingoTimeSummary({
     if (hours === 0) return "";
     if (hours < 1) return `${(hours * 60).toFixed(0)}m`;
     if (hours % 1 === 0) return `${hours}h`;
-    return `${hours}h`;
+    return `${hours.toFixed(1)}h`;
   };
 
   // Don't show time summaries if showTimeIndicators is false

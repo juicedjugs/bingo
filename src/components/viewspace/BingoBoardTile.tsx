@@ -294,8 +294,8 @@ export const BingoBoardTile = ({
         {state.showTimeIndicators && tileIdea && (
           <g>
             <rect
-              x={4}
-              y={size - 24}
+              x={2}
+              y={size - 18}
               width={Math.max(
                 32,
                 (tileIdea.timeToComplete || 1).toString().length * 8 + 16,
@@ -307,23 +307,20 @@ export const BingoBoardTile = ({
               strokeWidth="1"
             />
             <text
-              x={
-                4 +
-                Math.max(
-                  32,
-                  (tileIdea.timeToComplete || 1).toString().length * 8 + 16,
-                ) /
-                  2
-              }
-              y={size - 12}
-              textAnchor="middle"
+              x={8}
+              y={size - 6}
+              textAnchor="start"
               dominantBaseline="top"
               fontSize={10}
               fill="#a0a0a0"
               fontFamily="inherit"
               fontWeight="bold"
               style={{ pointerEvents: "none", userSelect: "none" }}>
-              {tileIdea.timeToComplete || 1}h
+              {(() => {
+                const t = tileIdea.timeToComplete || 1;
+                if (t < 1) return `${Math.round(t * 60)}m`;
+                return t % 1 === 0 ? `${t}h` : `${t.toFixed(1)}h`;
+              })()}
             </text>
           </g>
         )}

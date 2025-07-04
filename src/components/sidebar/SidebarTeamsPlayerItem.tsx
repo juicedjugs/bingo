@@ -2,7 +2,8 @@ import { Box, ListItem, Typography, IconButton, Tooltip } from "@mui/material";
 import { Icon } from "@iconify/react";
 import React, { useState, useEffect, memo, useMemo } from "react";
 import { useDraggable } from "@dnd-kit/core";
-import getUserStats, { computeCombatLevel } from "../../utils/getUserStats";
+import { useAppState } from "../../state";
+import { computeCombatLevel } from "../../utils/getUserStats";
 
 interface PlayerItemProps {
   player: any;
@@ -13,37 +14,31 @@ interface PlayerItemProps {
 
 const PlayerItem = memo(
   ({ player, playerIndex, isClient, onRemove }: PlayerItemProps) => {
-    const [combatLevel, setCombatLevel] = useState<number | null>(null);
-    const [isLoading, setIsLoading] = useState(false);
-    const [hasError, setHasError] = useState(false);
-    const [stats, setStats] = useState<any>(null);
-    const [isHydrated, setIsHydrated] = useState(false);
+    const { state } = useAppState();
+    const playerStats = state.playerStats[player.username];
 
-    useEffect(() => {
-      setIsHydrated(true);
-    }, []);
+    // Get combat level from stats if available
+    const combatLevel = playerStats?.stats?.skills
+      ? computeCombatLevel(playerStats.stats.skills)
+      : null;
 
-    useEffect(() => {
-      if (!isHydrated || !player.username) return;
+    const isLoading = !playerStats;
+    const hasError = false; // We'll handle errors differently now
+    const stats = playerStats?.stats || null;
 
-      const fetchCombatLevel = async () => {
-        try {
-          setIsLoading(true);
-          setHasError(false);
-          const stats = await getUserStats(player.username);
-          setStats(stats);
-          const level = computeCombatLevel(stats.skills);
-          setCombatLevel(level);
-        } catch (error) {
-          console.error(`Failed to fetch stats for ${player.username}:`, error);
-          setHasError(true);
-        } finally {
-          setIsLoading(false);
-        }
-      };
+    // Get weight and rank from state
+    const weight = playerStats?.weight || 0;
 
-      fetchCombatLevel();
-    }, [player.username, isHydrated]);
+    // Compute rank from all players in state
+    const allPlayers = Object.entries(state.playerStats).map(
+      ([name, data]) => ({
+        username: name,
+        weight: data.weight,
+      }),
+    );
+    const sortedPlayers = allPlayers.sort((a, b) => b.weight - a.weight);
+    const rank =
+      sortedPlayers.findIndex((p) => p.username === player.username) + 1;
 
     const dragData = useMemo(
       () => ({
@@ -63,7 +58,6 @@ const PlayerItem = memo(
     });
 
     const displayText = () => {
-      if (!isHydrated) return "...";
       if (isLoading) return "Loading...";
       if (hasError) return "Error";
       if (combatLevel !== null) return `${combatLevel}`;
@@ -72,9 +66,9 @@ const PlayerItem = memo(
 
     return (
       <div
-        ref={isHydrated ? setNodeRef : undefined}
+        ref={!isLoading ? setNodeRef : undefined}
         style={{
-          opacity: isHydrated && isDragging ? 0.5 : 1,
+          opacity: !isLoading && isDragging ? 0.5 : 1,
         }}>
         <Box
           sx={{
@@ -95,13 +89,13 @@ const PlayerItem = memo(
             <Tooltip title="Drag to assign to team">
               <IconButton
                 size="small"
-                {...(isHydrated ? attributes : {})}
-                {...(isHydrated ? listeners : {})}
+                {...(!isLoading ? attributes : {})}
+                {...(!isLoading ? listeners : {})}
                 sx={{
-                  cursor: isHydrated ? "grab" : "default",
+                  cursor: !isLoading ? "grab" : "default",
                   color: "text.secondary",
                   "&:hover": { color: "primary.main" },
-                  "&:active": { cursor: isHydrated ? "grabbing" : "default" },
+                  "&:active": { cursor: !isLoading ? "grabbing" : "default" },
                 }}
                 onDoubleClick={() => onRemove(playerIndex)}>
                 <Icon icon="mdi:drag" width={16} />
@@ -111,6 +105,13 @@ const PlayerItem = memo(
               <Typography variant="body2">
                 {player.username} ({displayText()})
               </Typography>
+              {!isLoading && (
+                <Typography
+                  variant="caption"
+                  sx={{ color: "text.secondary", display: "block" }}>
+                  {weight.toLocaleString()} (Rank {rank})
+                </Typography>
+              )}
             </Box>
           </Box>
           <Tooltip title="Remove">

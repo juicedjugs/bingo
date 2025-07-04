@@ -14,6 +14,8 @@ export interface TeamPlayerItemProps {
   teamIndex: number;
   positionInTeam: number;
   isClient: boolean;
+  forceCollapsed?: boolean;
+  isSwapTarget?: boolean;
 }
 
 const TeamPlayerItem = memo(
@@ -23,33 +25,20 @@ const TeamPlayerItem = memo(
     teamIndex,
     positionInTeam,
     isClient,
+    forceCollapsed = false,
+    isSwapTarget = false,
   }: TeamPlayerItemProps) => {
-    const [combatLevel, setCombatLevel] = useState<number | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const [hasError, setHasError] = useState(false);
-    const [stats, setStats] = useState<UserStats | null>(null);
-    const { assignPlayerToTeam } = useAppState();
+    const { state, assignPlayerToTeam } = useAppState();
+    const playerStats = state.playerStats[player.username];
 
-    useEffect(() => {
-      const fetchCombatLevel = async () => {
-        try {
-          setIsLoading(true);
-          setHasError(false);
-          const stats = await getUserStats(player.username);
-          setStats(stats);
-          const level = computeCombatLevel(stats.skills);
-          setCombatLevel(level);
-        } catch (error) {
-          console.error(`Failed to fetch stats for ${player.username}:`, error);
-          setHasError(true);
-        } finally {
-          setIsLoading(false);
-        }
-      };
-      if (player.username) {
-        fetchCombatLevel();
-      }
-    }, [player.username]);
+    // Get combat level from stats if available
+    const combatLevel = playerStats?.stats?.skills
+      ? computeCombatLevel(playerStats.stats.skills)
+      : null;
+
+    const isLoading = !playerStats;
+    const hasError = false; // We'll handle errors differently now
+    const stats = playerStats?.stats || null;
 
     // Memoize the drag data to ensure it updates when stats change
     const dragData = useMemo(
@@ -120,8 +109,9 @@ const TeamPlayerItem = memo(
           stats={stats}
           dragListeners={isClient ? listeners : undefined}
           dragAttributes={isClient ? attributes : undefined}
-          isDropTarget={isClient && isOver}
+          isDropTarget={isClient && (isOver || isSwapTarget)}
           onUnassign={() => assignPlayerToTeam(index, null)}
+          alwaysCollapsed={forceCollapsed}
         />
       </div>
     );

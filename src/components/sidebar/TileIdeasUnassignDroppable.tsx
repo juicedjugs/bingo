@@ -12,7 +12,7 @@ const UnassignDroppable = ({ children }: UnassignDroppableProps) => {
   const shouldShowOver = isOver;
 
   return (
-    <div
+    <Box
       ref={setNodeRef}
       style={{
         background: shouldShowOver
@@ -24,12 +24,11 @@ const UnassignDroppable = ({ children }: UnassignDroppableProps) => {
         borderRadius: 8,
         transition: "all 0.2s",
         position: "relative",
-        margin: "0 16px",
-        flex: 1,
-        minHeight: 0,
-        overflow: "hidden",
+        width: "calc(100% - 32px)",
+        overflow: "auto",
       }}>
-      {children}
+      <Box sx={{ minHeight: 120 }}>{children}</Box>
+
       {shouldShowOver && (
         <Box
           sx={{
@@ -54,7 +53,7 @@ const UnassignDroppable = ({ children }: UnassignDroppableProps) => {
           </Typography>
         </Box>
       )}
-    </div>
+    </Box>
   );
 };
 

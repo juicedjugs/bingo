@@ -459,28 +459,10 @@ const ExportPng = () => {
             variant="contained"
             color="primary"
             size="small"
-            onClick={() => handleExport(512)}
-            disabled={!previewUrl}
-            startIcon={<Icon icon="mdi:download" width={16} height={16} />}>
-            512×512
-          </Button>
-          <Button
-            variant="contained"
-            color="primary"
-            size="small"
-            onClick={() => handleExport(1024)}
-            disabled={!previewUrl}
-            startIcon={<Icon icon="mdi:download" width={16} height={16} />}>
-            1024×1024
-          </Button>
-          <Button
-            variant="contained"
-            color="primary"
-            size="small"
             onClick={() => handleExport(2048)}
             disabled={!previewUrl}
             startIcon={<Icon icon="mdi:download" width={16} height={16} />}>
-            2048×2048
+            Download
           </Button>
         </Box>
       </DialogActions>

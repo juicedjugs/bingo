@@ -78,18 +78,6 @@ const SidebarBoard = () => {
       <Divider sx={{ my: 1 }} />
       <TileIdeasHeader showSnackbar={showSnackbar} />
       <TileIdeasSearch search={search} onSearchChange={setSearch} />
-      <Tooltip title="Boss Icon Filter">
-        <IconButton
-          size="small"
-          sx={{ mx: 1, mb: 1 }}
-          onClick={() => setOpenBossFilter(true)}>
-          <Icon icon="mdi:filter" width={20} height={20} />
-        </IconButton>
-      </Tooltip>
-      <BossIconFilterDialog
-        open={openBossFilter}
-        onClose={() => setOpenBossFilter(false)}
-      />
       <TileIdeasList filteredTileIdeas={filteredTileIdeas} />
       <SnackbarNotification snackbar={snackbar} onClose={handleSnackbarClose} />
       <ExportPng />
