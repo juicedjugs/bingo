@@ -6,41 +6,31 @@ export interface TeamDroppableProps {
   teamId: string;
   children: React.ReactNode;
   isClient: boolean;
-  dragMode?: "insert" | "swap" | null;
-  dragTarget?: { teamId: string; playerIndex?: number } | null;
+  position?: number;
 }
 
 const TeamDroppable = React.memo(
-  ({
-    teamId,
-    children,
-    isClient,
-    dragMode,
-    dragTarget,
-  }: TeamDroppableProps) => {
+  ({ teamId, children, isClient, position }: TeamDroppableProps) => {
     const { setNodeRef, isOver } = useDroppable({
       id: `team-${teamId}`,
       data: {
         teamId,
-        dropPosition: 0, // Always add to the end of the team
+        position: position || 0,
+        dropPosition: position || 0,
       },
     });
-
-    const isDragTarget = dragTarget?.teamId === teamId;
-    const showInsertIndicator = dragMode === "insert" && isDragTarget;
 
     return (
       <div
         ref={isClient ? setNodeRef : undefined}
-        className="team-dropper"
         style={{
           position: "relative",
           transition: "all 0.15s ease",
         }}>
         {children}
 
-        {/* Insert indicator overlay - shows when dragging over team area but not over player cards */}
-        {showInsertIndicator && (
+        {/* Drop indicator - shows when DND Kit detects we're over this droppable */}
+        {isClient && isOver && (
           <Box
             sx={{
               position: "absolute",
@@ -48,26 +38,34 @@ const TeamDroppable = React.memo(
               top: 0,
               width: "100%",
               height: "100%",
-              bgcolor: "rgba(100, 181, 246, 0.1)",
-              borderRadius: 3,
+              bgcolor: "rgba(100, 181, 246, 0.2)",
+              borderRadius: 2,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               pointerEvents: "none",
               zIndex: 10,
-              border: "2px dashed #64b5f6",
+              border: "2px solid #64b5f6",
+              animation: "pulse 1.5s ease-in-out infinite",
+              "@keyframes pulse": {
+                "0%": { opacity: 0.7 },
+                "50%": { opacity: 1 },
+                "100%": { opacity: 0.7 },
+              },
             }}>
             <Box
               sx={{
-                bgcolor: "rgba(0, 0, 0, 0.8)",
+                bgcolor: "rgba(0, 0, 0, 0.9)",
                 color: "#64b5f6",
                 px: 3,
                 py: 1,
                 borderRadius: 2,
                 border: "1px solid #64b5f6",
               }}>
-              <Typography variant="body2" sx={{ fontWeight: "bold" }}>
-                Insert into team
+              <Typography
+                variant="body2"
+                sx={{ fontWeight: "bold", textAlign: "center" }}>
+                Drop here
               </Typography>
             </Box>
           </Box>

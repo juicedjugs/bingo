@@ -1,5 +1,5 @@
 import { Box } from "@mui/material";
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback } from "react";
 import {
   DndContext,
   closestCenter,
@@ -21,79 +21,18 @@ export default function TeamsView() {
   const { tileIdeas } = useTileIdeas();
   const [activeDrag, setActiveDrag] = useState<any>(null);
   const [activeType, setActiveType] = useState<string | null>(null);
-  const [dragMode, setDragMode] = useState<"insert" | "swap" | null>(null);
-  const [dragTarget, setDragTarget] = useState<{
-    teamId: string;
-    playerIndex?: number;
-  } | null>(null);
 
   const handleDragStart = useCallback((event: DragStartEvent) => {
     setActiveDrag(event.active);
     setActiveType(
       event.active.id.toString().startsWith("player-") ? "player" : null,
     );
-    setDragMode(null);
-    setDragTarget(null);
   }, []);
-
-  // Track mouse movement during drag
-  useEffect(() => {
-    if (!activeDrag) return;
-
-    const handleMouseMove = (event: MouseEvent) => {
-      // Check what element the cursor is over
-      const elementUnderCursor = document.elementFromPoint(
-        event.clientX,
-        event.clientY,
-      );
-
-      if (!elementUnderCursor) {
-        setDragMode(null);
-        setDragTarget(null);
-        return;
-      }
-
-      // Check if cursor is over a team area FIRST
-      const teamArea = elementUnderCursor.closest("[data-team-area]");
-      if (teamArea) {
-        const teamId = teamArea.getAttribute("data-team-id");
-        if (teamId) {
-          // Now check if we're specifically over a player card within this team
-          const playerCard = elementUnderCursor.closest("[data-player-card]");
-          if (playerCard) {
-            const playerIndex = playerCard.getAttribute("data-player-index");
-            const playerTeamId = playerCard.getAttribute("data-team-id");
-            if (playerIndex && playerTeamId && playerTeamId === teamId) {
-              setDragMode("swap");
-              setDragTarget({ teamId, playerIndex: parseInt(playerIndex) });
-              return;
-            }
-          }
-
-          // Not over a player card, so it's an insert
-          setDragMode("insert");
-          setDragTarget({ teamId });
-          return;
-        }
-      }
-
-      // Not over any valid drop target
-      setDragMode(null);
-      setDragTarget(null);
-    };
-
-    document.addEventListener("mousemove", handleMouseMove);
-    return () => {
-      document.removeEventListener("mousemove", handleMouseMove);
-    };
-  }, [activeDrag]);
 
   const handleDragEnd = useCallback(
     (event: DragEndEvent) => {
       setActiveDrag(null);
       setActiveType(null);
-      setDragMode(null);
-      setDragTarget(null);
 
       const { active, over } = event;
       if (!over) return;
@@ -104,10 +43,10 @@ export default function TeamsView() {
       // Player dropped on team
       if (activeId.startsWith("player-") && overId.startsWith("team-")) {
         const playerIndex = event.active.data?.current?.playerIndex;
-        const teamIndex = Number(overId.replace("team-", ""));
+        const teamId = overId.replace("team-", "");
 
         if (typeof playerIndex === "number") {
-          assignPlayerToTeam(playerIndex, String(teamIndex));
+          assignPlayerToTeam(playerIndex, teamId);
         }
         return;
       }
@@ -160,7 +99,7 @@ export default function TeamsView() {
       onDragStart={handleDragStart}>
       <Box sx={{ display: "flex" }}>
         <Sidebar tab="teams" />
-        <Viewspace tab="teams" dragMode={dragMode} dragTarget={dragTarget} />
+        <Viewspace tab="teams" />
       </Box>
       <DragOverlay dropAnimation={null}>
         {activeType === "player" && activeDrag ? (

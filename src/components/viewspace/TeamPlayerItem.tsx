@@ -15,7 +15,6 @@ export interface TeamPlayerItemProps {
   positionInTeam: number;
   isClient: boolean;
   forceCollapsed?: boolean;
-  isSwapTarget?: boolean;
 }
 
 const TeamPlayerItem = memo(
@@ -26,7 +25,6 @@ const TeamPlayerItem = memo(
     positionInTeam,
     isClient,
     forceCollapsed = false,
-    isSwapTarget = false,
   }: TeamPlayerItemProps) => {
     const { state, assignPlayerToTeam } = useAppState();
     const playerStats = state.playerStats[player.username];
@@ -109,7 +107,7 @@ const TeamPlayerItem = memo(
           stats={stats}
           dragListeners={isClient ? listeners : undefined}
           dragAttributes={isClient ? attributes : undefined}
-          isDropTarget={isClient && (isOver || isSwapTarget)}
+          isDropTarget={isClient && isOver}
           onUnassign={() => assignPlayerToTeam(index, null)}
           alwaysCollapsed={forceCollapsed}
         />

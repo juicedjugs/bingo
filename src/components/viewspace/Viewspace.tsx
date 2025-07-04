@@ -7,11 +7,9 @@ import { BingoBoard } from "./BingoBoard";
 
 interface ViewspaceProps {
   tab: "board" | "teams";
-  dragMode?: "insert" | "swap" | null;
-  dragTarget?: { teamId: string; playerIndex?: number } | null;
 }
 
-const Viewspace = ({ tab, dragMode, dragTarget }: ViewspaceProps) => {
+const Viewspace = ({ tab }: ViewspaceProps) => {
   const { state } = useAppState();
   const dimension = state.dimension;
   return (
@@ -41,11 +39,7 @@ const Viewspace = ({ tab, dragMode, dragTarget }: ViewspaceProps) => {
               textAlign: "center",
             }}>
             {/* Board */}
-            {tab === "board" ? (
-              <BingoBoard />
-            ) : (
-              <Teams dragMode={dragMode} dragTarget={dragTarget} />
-            )}
+            {tab === "board" ? <BingoBoard /> : <Teams />}
           </Box>
         </Box>
       </Box>
